@@ -1,5 +1,5 @@
 #include "ladder.h"
-
+#include <algorithm>
 using namespace std;
 
 
@@ -38,7 +38,17 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
 }
 
 bool is_adjacent(const string& word1, const string& word2) {
-    return edit_distance_within(word1, word2, 1);
+    if (word1.length() != word2.length()) return false;
+
+    int diff_count = 0;
+    for (size_t i = 0; i < word1.length(); i++) {
+        if (word1[i] != word2[i]) {
+            diff_count++;
+            if (diff_count > 1) return false;
+        }
+    }
+    return diff_count == 1;
+
 }
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
     if (begin_word == end_word) return {};
@@ -64,10 +74,9 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                 ladder_queue.push(new_ladder);
             }
         }
+        visited.insert(level_visited.begin(), level_visited.end());
     }
     return {};
-
-
 }
 
 
@@ -78,7 +87,10 @@ void load_words(set<string> & word_list, const string& file_name) {
         return;
     }
     string word;
-    while (file >> word) word_list.insert(word);
+    while (file >> word){
+        transform(word.begin(), word.end(), word.begin(), ::tolower);
+        word_list.insert(word);
+    }
     file.close();
 }
 
